@@ -10,39 +10,49 @@ content %}
 <div class="message-layout">
   <!-- Message List -->
   <div class="message-list">
-    <div class="message-item active">
+    <div class="message-item active" data-sender="Dr. Sarah Johnson">
       <div class="message-sender">Dr. Sarah Johnson</div>
       <div class="message-preview">
         Your test results are ready. Please check your portal...
       </div>
+      <div class="message-time">2 hours ago</div>
     </div>
-    <div class="message-item">
+    <div class="message-item" data-sender="Billing Department">
       <div class="message-sender">Billing Department</div>
       <div class="message-preview">
         Your recent payment has been processed successfully...
       </div>
+      <div class="message-time">1 day ago</div>
     </div>
-    <div class="message-item">
+    <div class="message-item" data-sender="Dr. Michael Chen">
       <div class="message-sender">Dr. Michael Chen</div>
       <div class="message-preview">
         Reminder: Your appointment is scheduled for tomorrow at...
       </div>
+      <div class="message-time">2 days ago</div>
     </div>
-    <div class="message-item">
+    <div class="message-item" data-sender="Hospital Administration">
       <div class="message-sender">Hospital Administration</div>
       <div class="message-preview">
         New health tips and resources available in your portal...
       </div>
+      <div class="message-time">1 week ago</div>
     </div>
   </div>
 
   <!-- Message Thread -->
   <div class="message-thread">
     <div class="message-header">
-      <div class="message-sender">Dr. Sarah Johnson - Cardiology</div>
+      <div class="message-sender-info">
+        <div class="message-sender-name" id="current-sender">
+          Dr. Sarah Johnson - Cardiology
+        </div>
+        <div class="message-sender-status">Online</div>
+      </div>
     </div>
-    <div class="message-content">
-      <div style="padding: 20px; text-align: center; color: #6c757d">
+    <div class="message-content" id="message-content">
+      <!-- Messages will be loaded here dynamically -->
+      <div class="message-thread-placeholder">
         <i
           class="fas fa-comments"
           style="font-size: 48px; margin-bottom: 20px"
@@ -52,8 +62,12 @@ content %}
     </div>
     <div class="message-input">
       <div class="message-input-group">
-        <input type="text" placeholder="Type your message..." />
-        <button class="send-btn">
+        <input
+          type="text"
+          placeholder="Type your message..."
+          id="message-input"
+        />
+        <button class="send-btn" onclick="sendMessage()">
           <i class="fas fa-paper-plane"></i> Send
         </button>
       </div>
@@ -61,7 +75,170 @@ content %}
   </div>
 </div>
 
+<style>
+  .message-thread-placeholder {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+  }
+
+  .message-sender-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .message-sender-status {
+    font-size: 12px;
+    color: #28a745;
+    font-weight: 500;
+  }
+
+  .message-time {
+    font-size: 11px;
+    color: #6c757d;
+    margin-top: 5px;
+  }
+
+  .message-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    margin: 8px 0;
+    border-radius: 18px;
+    position: relative;
+    word-wrap: break-word;
+  }
+
+  .message-received {
+    background: #f1f3f5;
+    color: #333;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+  }
+
+  .message-sent {
+    background: #007bff;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+  }
+
+  .message-timestamp {
+    font-size: 11px;
+    color: #6c757d;
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  .message-sent .message-timestamp {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .messages-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    height: 400px;
+    overflow-y: auto;
+  }
+</style>
+
 <script>
+  // Sample conversation data
+  const conversations = {
+    "Dr. Sarah Johnson": [
+      {
+        text: "Hello, your recent blood test results are now available in your portal. Everything looks good!",
+        sender: "them",
+        time: "10:30 AM",
+      },
+      {
+        text: "Thank you doctor. Should I schedule a follow-up appointment?",
+        sender: "me",
+        time: "10:32 AM",
+      },
+      {
+        text: "Yes, that would be good. Let's schedule one for next month to review your progress.",
+        sender: "them",
+        time: "10:35 AM",
+      },
+      {
+        text: "Great, I'll book it through the portal. Thanks!",
+        sender: "me",
+        time: "10:36 AM",
+      },
+      {
+        text: "Your cholesterol levels have improved significantly since your last visit. Keep up the good work with your diet and exercise.",
+        sender: "them",
+        time: "2 hours ago",
+      },
+    ],
+    "Billing Department": [
+      {
+        text: "Dear patient, your payment of $150.00 has been successfully processed. Thank you!",
+        sender: "them",
+        time: "Yesterday",
+      },
+      {
+        text: "Thank you for the confirmation. Can you send me a receipt?",
+        sender: "me",
+        time: "Yesterday",
+      },
+      {
+        text: "Certainly! The receipt has been emailed to you and is also available in your billing documents.",
+        sender: "them",
+        time: "Yesterday",
+      },
+      {
+        text: "Perfect, received it. Thank you!",
+        sender: "me",
+        time: "Yesterday",
+      },
+    ],
+    "Dr. Michael Chen": [
+      {
+        text: "Reminder: Your annual physical examination is scheduled for Nov 17 at 10:00 AM.",
+        sender: "them",
+        time: "2 days ago",
+      },
+      {
+        text: "Thanks for the reminder. Should I bring any specific documents?",
+        sender: "me",
+        time: "2 days ago",
+      },
+      {
+        text: "Please bring your medication list and any questions you have about your health.",
+        sender: "them",
+        time: "2 days ago",
+      },
+      { text: "Will do. See you then!", sender: "me", time: "2 days ago" },
+    ],
+    "Hospital Administration": [
+      {
+        text: "New health resources are now available in your patient portal!",
+        sender: "them",
+        time: "1 week ago",
+      },
+      {
+        text: "We've added articles about nutrition, exercise, and stress management.",
+        sender: "them",
+        time: "1 week ago",
+      },
+      {
+        text: "Thank you! I'll check them out. The portal is very helpful.",
+        sender: "me",
+        time: "1 week ago",
+      },
+      {
+        text: "We're glad to hear that! Let us know if you have any feedback.",
+        sender: "them",
+        time: "1 week ago",
+      },
+    ],
+  };
+
   document.querySelectorAll(".message-item").forEach((item) => {
     item.addEventListener("click", function () {
       document
@@ -69,11 +246,125 @@ content %}
         .forEach((i) => i.classList.remove("active"));
       this.classList.add("active");
 
-      // In a real app, you would load the conversation here
-      const sender = this.querySelector(".message-sender").textContent;
-      document.querySelector(".message-header .message-sender").textContent =
-        sender;
+      const sender = this.getAttribute("data-sender");
+      loadConversation(sender);
     });
   });
+
+  function loadConversation(sender) {
+    const messageContent = document.getElementById("message-content");
+    const currentSender = document.getElementById("current-sender");
+
+    currentSender.textContent =
+      sender +
+      (sender === "Dr. Sarah Johnson"
+        ? " - Cardiology"
+        : sender === "Dr. Michael Chen"
+        ? " - Primary Care"
+        : sender === "Billing Department"
+        ? " - Finance"
+        : " - Administration");
+
+    const messages = conversations[sender] || [];
+
+    if (messages.length === 0) {
+      messageContent.innerHTML = `
+          <div class="message-thread-placeholder">
+            <i class="fas fa-comments" style="font-size: 48px; margin-bottom: 20px"></i>
+            <p>No messages in this conversation</p>
+          </div>
+        `;
+      return;
+    }
+
+    const messagesHTML = messages
+      .map(
+        (message) => `
+        <div class="message-bubble ${
+          message.sender === "me" ? "message-sent" : "message-received"
+        }">
+          <div class="message-text">${message.text}</div>
+          <div class="message-timestamp">${message.time}</div>
+        </div>
+      `
+      )
+      .join("");
+
+    messageContent.innerHTML = `
+        <div class="messages-container">
+          ${messagesHTML}
+        </div>
+      `;
+
+    // Scroll to bottom
+    const container = messageContent.querySelector(".messages-container");
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }
+
+  function sendMessage() {
+    const input = document.getElementById("message-input");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    const activeItem = document.querySelector(".message-item.active");
+    if (!activeItem) return;
+
+    const sender = activeItem.getAttribute("data-sender");
+    const currentTime = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    // Add message to conversation
+    if (conversations[sender]) {
+      conversations[sender].push({
+        text: message,
+        sender: "me",
+        time: currentTime,
+      });
+    }
+
+    // Reload conversation to show new message
+    loadConversation(sender);
+
+    // Clear input
+    input.value = "";
+
+    // Simulate reply after 2 seconds
+    setTimeout(() => {
+      if (conversations[sender]) {
+        const replies = [
+          "Thank you for your message. We'll get back to you soon.",
+          "I've noted your message. Is there anything else I can help with?",
+          "Thanks for the update!",
+          "I'll look into this and get back to you.",
+        ];
+        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+        conversations[sender].push({
+          text: randomReply,
+          sender: "them",
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        });
+
+        loadConversation(sender);
+      }
+    }, 2000);
+  }
+
+  // Allow pressing Enter to send message
+  document
+    .getElementById("message-input")
+    ?.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
 </script>
 {% endblock %}
