@@ -670,4 +670,5 @@ def admin_dashboard_auth():
     return dash_app.index()
 
 if __name__ == '__main__':
-    server.run(debug=True, host='0.0.0.0', port=8080)
+    port = int(os.environ.get("PORT", 8080))
+    server.run(debug=False, host='0.0.0.0', port=port)
