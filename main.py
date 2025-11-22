@@ -32,7 +32,7 @@ otp_storage = {}
 # Load data - for CodeSandbox, we'll create sample data if file doesn't exist
 try:
     # Try to load your actual data file
-    merged_data = pd.read_excel(r'/project/workspace/merged_data.xlsx')
+    merged_data = pd.read_excel(r'merged_data.xlsx')
     print('Data Loaded')
 except:
     # Create sample data for demo purposes
