@@ -580,6 +580,13 @@ def get_otp():
     if not mobile or len(mobile) != 10 or not mobile.isdigit():
         return jsonify({'success': False, 'message': 'Please enter a valid 10-digit mobile number'})
     
+    # Only allow the specific demo patient
+    if mobile != '1234567890':
+        return jsonify({
+            'success': False, 
+            'message': 'Your phone number is not valid as it is not registered with us. Please contact admin if you think there is a mistake'
+        })
+    
     otp = str(random.randint(1000, 999999))
     otp_storage[mobile] = {
         'otp': otp,
@@ -589,7 +596,7 @@ def get_otp():
     
     print(f"OTP for {mobile}: {otp}")  # For testing
     
-    return jsonify({'success': True, 'message': 'OTP sent successfully'})
+    return jsonify({'success': True, 'message': 'OTP sent successfully', 'otp': otp})  # Return OTP for demo
 
 @server.route('/verify-otp', methods=['POST'])
 def verify_otp():
