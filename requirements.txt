@@ -2,3 +2,5 @@ Flask==2.3.3
 plotly
 dash
 pandas
+numpy
+openpyxl
