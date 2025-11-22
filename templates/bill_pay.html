@@ -9,31 +9,298 @@ content %}
     <h3 class="card-title">Billing Overview</h3>
   </div>
   <div class="card-content">
-    <div style="text-align: center; padding: 40px">
-      <i
-        class="fas fa-credit-card"
-        style="font-size: 64px; color: #6c757d; margin-bottom: 20px"
-      ></i>
-      <h3 style="color: #333; margin-bottom: 15px">Bill Pay Portal</h3>
-      <p style="color: #6c757d; margin-bottom: 25px">
-        View your bills, make payments, and manage your billing preferences.
-      </p>
-      <div class="grid-3">
+    <div style="padding: 30px">
+      <div class="grid-3" style="margin-bottom: 30px">
         <div class="card">
           <h4>Current Balance</h4>
           <p style="font-size: 24px; font-weight: bold; color: #333">$0.00</p>
+          <p style="font-size: 14px; color: #28a745">All bills paid</p>
         </div>
         <div class="card">
           <h4>Due Date</h4>
           <p style="font-size: 18px; color: #333">No pending bills</p>
+          <p style="font-size: 14px; color: #6c757d">Next bill: Dec 15, 2024</p>
         </div>
-        <div class="card">
+        <div
+          class="card clickable"
+          onclick="showPaymentHistory()"
+          style="cursor: pointer"
+        >
           <h4>Last Payment</h4>
-          <p style="font-size: 18px; color: #333">$150.00</p>
+          <p style="font-size: 24px; font-weight: bold; color: #333">$150.00</p>
           <p style="font-size: 14px; color: #6c757d">Nov 15, 2024</p>
+          <p style="font-size: 12px; color: #007bff; margin-top: 5px">
+            Click to view history
+          </p>
+        </div>
+      </div>
+
+      <!-- Payment History Section -->
+      <div id="payment-history" style="display: none">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Payment History</h3>
+            <button class="btn btn-secondary" onclick="hidePaymentHistory()">
+              <i class="fas fa-times"></i> Close
+            </button>
+          </div>
+          <div class="card-content">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Receipt</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Nov 15, 2024</td>
+                    <td>Cardiology Consultation</td>
+                    <td>$150.00</td>
+                    <td><span class="status-badge status-paid">Paid</span></td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-outline"
+                        onclick="downloadReceipt('nov-2024')"
+                      >
+                        <i class="fas fa-download"></i> Download
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Oct 10, 2024</td>
+                    <td>Laboratory Tests</td>
+                    <td>$85.50</td>
+                    <td><span class="status-badge status-paid">Paid</span></td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-outline"
+                        onclick="downloadReceipt('oct-2024')"
+                      >
+                        <i class="fas fa-download"></i> Download
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Sep 5, 2024</td>
+                    <td>Primary Care Visit</td>
+                    <td>$75.00</td>
+                    <td><span class="status-badge status-paid">Paid</span></td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-outline"
+                        onclick="downloadReceipt('sep-2024')"
+                      >
+                        <i class="fas fa-download"></i> Download
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Aug 20, 2024</td>
+                    <td>Prescription Medication</td>
+                    <td>$45.25</td>
+                    <td><span class="status-badge status-paid">Paid</span></td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-outline"
+                        onclick="downloadReceipt('aug-2024')"
+                      >
+                        <i class="fas fa-download"></i> Download
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Jul 12, 2024</td>
+                    <td>Annual Physical</td>
+                    <td>$120.00</td>
+                    <td><span class="status-badge status-paid">Paid</span></td>
+                    <td>
+                      <button
+                        class="btn btn-sm btn-outline"
+                        onclick="downloadReceipt('jul-2024')"
+                      >
+                        <i class="fas fa-download"></i> Download
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Payment Statistics -->
+            <div class="grid-2" style="margin-top: 30px; gap: 20px">
+              <div class="card">
+                <h4>Year-to-Date Payments</h4>
+                <p
+                  style="
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #333;
+                    margin: 10px 0;
+                  "
+                >
+                  $475.75
+                </p>
+                <p style="font-size: 14px; color: #6c757d">
+                  7 payments in 2024
+                </p>
+              </div>
+              <div class="card">
+                <h4>Average Payment</h4>
+                <p
+                  style="
+                    font-size: 28px;
+                    font-weight: bold;
+                    color: #333;
+                    margin: 10px 0;
+                  "
+                >
+                  $67.96
+                </p>
+                <p style="font-size: 14px; color: #6c757d">Per visit</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="card" style="margin-top: 30px">
+        <div class="card-header">
+          <h3 class="card-title">Quick Actions</h3>
+        </div>
+        <div class="card-content">
+          <div class="grid-3">
+            <button
+              class="btn btn-outline"
+              style="padding: 15px; text-align: center"
+            >
+              <i
+                class="fas fa-file-invoice-dollar"
+                style="font-size: 24px; margin-bottom: 10px"
+              ></i>
+              <div>View Statements</div>
+            </button>
+            <button
+              class="btn btn-outline"
+              style="padding: 15px; text-align: center"
+            >
+              <i
+                class="fas fa-credit-card"
+                style="font-size: 24px; margin-bottom: 10px"
+              ></i>
+              <div>Payment Methods</div>
+            </button>
+            <button
+              class="btn btn-outline"
+              style="padding: 15px; text-align: center"
+            >
+              <i
+                class="fas fa-bell"
+                style="font-size: 24px; margin-bottom: 10px"
+              ></i>
+              <div>Billing Alerts</div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
+
+<style>
+  .clickable:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+    transition: all 0.3s ease;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-paid {
+    background-color: #d4edda;
+    color: #155724;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+  }
+
+  .data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid #007bff;
+    color: #007bff;
+  }
+
+  .btn-outline:hover {
+    background: #007bff;
+    color: white;
+  }
+</style>
+
+<script>
+  function showPaymentHistory() {
+    document.getElementById("payment-history").style.display = "block";
+    // Scroll to the payment history section
+    document
+      .getElementById("payment-history")
+      .scrollIntoView({ behavior: "smooth" });
+  }
+
+  function hidePaymentHistory() {
+    document.getElementById("payment-history").style.display = "none";
+  }
+
+  function downloadReceipt(receiptId) {
+    // Simulate receipt download
+    alert(`Downloading receipt for ${receiptId}`);
+    // In a real application, this would trigger a file download
+    console.log(`Downloading receipt: ${receiptId}`);
+  }
+
+  // Add hover effects to table rows
+  document.addEventListener("DOMContentLoaded", function () {
+    const tableRows = document.querySelectorAll(".data-table tbody tr");
+    tableRows.forEach((row) => {
+      row.addEventListener("mouseenter", function () {
+        this.style.backgroundColor = "#f8f9fa";
+      });
+      row.addEventListener("mouseleave", function () {
+        this.style.backgroundColor = "";
+      });
+    });
+  });
+</script>
 {% endblock %}
