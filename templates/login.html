@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hospital Portal - Login</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        width: 400px;
+        max-width: 90%;
+        overflow: hidden;
+      }
+
+      .login-header {
+        display: flex;
+        border-bottom: 1px solid #eee;
+      }
+
+      .login-tab {
+        flex: 1;
+        padding: 20px;
+        text-align: center;
+        background: #f8f9fa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .login-tab.active {
+        background: white;
+        color: #007bff;
+        border-bottom: 3px solid #007bff;
+      }
+
+      .login-tab:not(.active):hover {
+        background: #e9ecef;
+      }
+
+      .login-content {
+        padding: 40px 30px;
+      }
+
+      .logo {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .logo-placeholder {
+        width: 80px;
+        height: 80px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        color: #6c757d;
+        font-size: 12px;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 24px;
+        font-weight: 600;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+        font-weight: 500;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="tel"] {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #007bff;
+      }
+
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin: 20px 0;
+      }
+
+      .checkbox-group input {
+        margin-right: 10px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 12px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .btn:hover {
+        background: #0056b3;
+      }
+
+      .btn:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+      }
+
+      .error-message {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      .success-message {
+        color: #28a745;
+        font-size: 14px;
+        margin-top: 10px;
+        text-align: center;
+      }
+
+      .step {
+        display: none;
+      }
+
+      .step.active {
+        display: block;
+      }
+
+      .otp-info {
+        background: #e7f3ff;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #0066cc;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <div class="login-header">
+        <button class="login-tab active" data-tab="customer">Customer</button>
+        <button class="login-tab" data-tab="admin">Admin</button>
+      </div>
+
+      <div class="login-content">
+        <!-- Logo -->
+        <div class="logo">
+          <div class="logo-placeholder">LOGO</div>
+        </div>
+
+        <h1>User Login/Sign Up</h1>
+
+        <!-- Customer Login (Mobile + OTP) -->
+        <div id="customer-login" class="login-form">
+          <!-- Step 1: Mobile Number -->
+          <div id="step-mobile" class="step active">
+            <div class="form-group">
+              <label for="mobile">Enter Mobile Number</label>
+              <input
+                type="tel"
+                id="mobile"
+                placeholder="10-digit mobile number"
+                maxlength="10"
+                pattern="[0-9]{10}"
+              />
+            </div>
+            <button class="btn" onclick="sendOTP()">Send OTP</button>
+            <div id="mobile-error" class="error-message"></div>
+          </div>
+
+          <!-- Step 2: OTP Verification -->
+          <div id="step-otp" class="step">
+            <div class="otp-info">
+              OTP sent to <span id="mobile-display"></span>
+            </div>
+            <div class="form-group">
+              <label for="otp">Enter OTP</label>
+              <input
+                type="text"
+                id="otp"
+                placeholder="Enter 4-6 digit OTP"
+                maxlength="6"
+                pattern="[0-9]{4,6}"
+              />
+            </div>
+            <div class="checkbox-group">
+              <input type="checkbox" id="remember-me" />
+              <label for="remember-me">Remember Me</label>
+            </div>
+            <button class="btn" onclick="verifyOTP()">Login</button>
+            <div id="otp-error" class="error-message"></div>
+          </div>
+        </div>
+
+        <!-- Admin Login (Email + Password) -->
+        <div id="admin-login" class="login-form" style="display: none">
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="admin@hospital.com" />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter password" />
+          </div>
+          <button class="btn" onclick="adminLogin()">Login</button>
+          <div id="admin-error" class="error-message"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Tab switching
+      document.querySelectorAll(".login-tab").forEach((tab) => {
+        tab.addEventListener("click", function () {
+          // Update active tab
+          document
+            .querySelectorAll(".login-tab")
+            .forEach((t) => t.classList.remove("active"));
+          this.classList.add("active");
+
+          // Show appropriate login form
+          const tabType = this.getAttribute("data-tab");
+          document.getElementById("customer-login").style.display =
+            tabType === "customer" ? "block" : "none";
+          document.getElementById("admin-login").style.display =
+            tabType === "admin" ? "block" : "none";
+
+          // Reset steps for customer login
+          if (tabType === "customer") {
+            showStep("step-mobile");
+          }
+        });
+      });
+
+      let currentMobile = "";
+
+      function sendOTP() {
+        const mobile = document.getElementById("mobile").value;
+        const errorDiv = document.getElementById("mobile-error");
+
+        // Validate mobile
+        if (!mobile || mobile.length !== 10 || !/^\d+$/.test(mobile)) {
+          errorDiv.textContent = "Please enter a valid 10-digit mobile number";
+          return;
+        }
+
+        errorDiv.textContent = "";
+        currentMobile = mobile;
+
+        // Send OTP request
+        fetch("/get-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ mobile: mobile }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              document.getElementById("mobile-display").textContent = mobile;
+              showStep("step-otp");
+            } else {
+              errorDiv.textContent = data.message;
+            }
+          })
+          .catch((error) => {
+            errorDiv.textContent = "Network error. Please try again.";
+          });
+      }
+
+      function verifyOTP() {
+        const otp = document.getElementById("otp").value;
+        const rememberMe = document.getElementById("remember-me").checked;
+        const errorDiv = document.getElementById("otp-error");
+
+        if (!otp || otp.length < 4) {
+          errorDiv.textContent = "Please enter a valid OTP";
+          return;
+        }
+
+        fetch("/verify-otp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            mobile: currentMobile,
+            otp: otp,
+            remember_me: rememberMe,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              window.location.href = "/dashboard";
+            } else {
+              errorDiv.textContent = data.message;
+            }
+          })
+          .catch((error) => {
+            errorDiv.textContent = "Network error. Please try again.";
+          });
+      }
+
+      function adminLogin() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const errorDiv = document.getElementById("admin-error");
+
+        const formData = new FormData();
+        formData.append("email", email);
+        formData.append("password", password);
+
+        fetch("/admin-login", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              window.location.href = "/admin-dashboard";
+            } else {
+              errorDiv.textContent = data.message || "Invalid credentials";
+            }
+          })
+          .catch((error) => {
+            errorDiv.textContent = "Network error. Please try again.";
+          });
+      }
+
+      function showStep(stepId) {
+        document.querySelectorAll(".step").forEach((step) => {
+          step.classList.remove("active");
+        });
+        document.getElementById(stepId).classList.add("active");
+      }
+
+      // Mobile number validation
+      document.getElementById("mobile").addEventListener("input", function (e) {
+        this.value = this.value.replace(/\D/g, "").slice(0, 10);
+      });
+
+      // OTP validation
+      document.getElementById("otp").addEventListener("input", function (e) {
+        this.value = this.value.replace(/\D/g, "").slice(0, 6);
+      });
+    </script>
+  </body>
+</html>

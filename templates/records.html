@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block title %}My Records{% endblock %} {% block
+content %}
+<div class="content-header">
+  <h1 class="page-title">My Records</h1>
+</div>
+
+<!-- Record Categories -->
+<div style="max-width: 800px">
+  <div class="record-category">
+    <div class="record-title">Visit Summaries</div>
+    <div class="record-desc">
+      Detailed reports from your medical visits and consultations
+    </div>
+  </div>
+
+  <div class="record-category">
+    <div class="record-title">Lab Results</div>
+    <div class="record-desc">
+      Blood tests, urine tests, and other laboratory reports
+    </div>
+  </div>
+
+  <div class="record-category">
+    <div class="record-title">Imaging Reports</div>
+    <div class="record-desc">
+      X-rays, MRIs, CT scans, and ultrasound reports
+    </div>
+  </div>
+
+  <div class="record-category">
+    <div class="record-title">Prescriptions</div>
+    <div class="record-desc">
+      Current and historical medication prescriptions
+    </div>
+  </div>
+
+  <div class="record-category">
+    <div class="record-title">Immunization Records</div>
+    <div class="record-desc">
+      Vaccination history and immunization schedules
+    </div>
+  </div>
+
+  <div class="record-category">
+    <div class="record-title">Medical History</div>
+    <div class="record-desc">
+      Comprehensive medical history and chronic conditions
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".record-category").forEach((category) => {
+    category.addEventListener("click", function () {
+      const title = this.querySelector(".record-title").textContent;
+      alert(
+        `Opening ${title} section - This would show detailed records in a real application`
+      );
+    });
+  });
+</script>
+{% endblock %}

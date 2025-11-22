@@ -1,0 +1,79 @@
+{% extends "base.html" %} {% block title %}Messages{% endblock %} {% block
+content %}
+<div class="content-header">
+  <h1 class="page-title">Messages</h1>
+  <button class="btn btn-primary">
+    <i class="fas fa-envelope"></i> New Message
+  </button>
+</div>
+
+<div class="message-layout">
+  <!-- Message List -->
+  <div class="message-list">
+    <div class="message-item active">
+      <div class="message-sender">Dr. Sarah Johnson</div>
+      <div class="message-preview">
+        Your test results are ready. Please check your portal...
+      </div>
+    </div>
+    <div class="message-item">
+      <div class="message-sender">Billing Department</div>
+      <div class="message-preview">
+        Your recent payment has been processed successfully...
+      </div>
+    </div>
+    <div class="message-item">
+      <div class="message-sender">Dr. Michael Chen</div>
+      <div class="message-preview">
+        Reminder: Your appointment is scheduled for tomorrow at...
+      </div>
+    </div>
+    <div class="message-item">
+      <div class="message-sender">Hospital Administration</div>
+      <div class="message-preview">
+        New health tips and resources available in your portal...
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Thread -->
+  <div class="message-thread">
+    <div class="message-header">
+      <div class="message-sender">Dr. Sarah Johnson - Cardiology</div>
+    </div>
+    <div class="message-content">
+      <div style="padding: 20px; text-align: center; color: #6c757d">
+        <i
+          class="fas fa-comments"
+          style="font-size: 48px; margin-bottom: 20px"
+        ></i>
+        <p>Select a conversation to view messages</p>
+      </div>
+    </div>
+    <div class="message-input">
+      <div class="message-input-group">
+        <input type="text" placeholder="Type your message..." />
+        <button class="send-btn">
+          <i class="fas fa-paper-plane"></i> Send
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll(".message-item").forEach((item) => {
+    item.addEventListener("click", function () {
+      document
+        .querySelectorAll(".message-item")
+        .forEach((i) => i.classList.remove("active"));
+      this.classList.add("active");
+
+      // In a real app, you would load the conversation here
+      const sender = this.querySelector(".message-sender").textContent;
+      document.querySelector(".message-header .message-sender").textContent =
+        sender;
+    });
+  });
+</script>
+{% endblock %}

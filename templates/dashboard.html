@@ -1,0 +1,98 @@
+{% extends "base.html" %} {% block title %}Dashboard{% endblock %} {% block
+content %}
+<div class="content-header">
+  <h1 class="page-title">Dashboard</h1>
+</div>
+
+<!-- Welcome Section -->
+<div class="welcome-section">
+  <h2 class="welcome-title">WELCOME BACK John Smith</h2>
+  <p class="welcome-subtitle">Here's your health overview for today</p>
+</div>
+
+<!-- Main Grid -->
+<div class="grid-2">
+  <!-- Upcoming Appointments -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Upcoming Appointments</h3>
+      <a href="/appointments" class="card-action">View All</a>
+    </div>
+    <div class="card-content">
+      <ul class="appointment-list">
+        <li class="appointment-item">
+          <div class="appointment-doctors">Dr. Sarah Johnson</div>
+          <div class="appointment-specialty">Cardiology</div>
+          <div class="appointment-date">Today, 2:30 PM</div>
+        </li>
+        <li class="appointment-item">
+          <div class="appointment-doctors">Dr. Michael Chen</div>
+          <div class="appointment-specialty">Dermatology</div>
+          <div class="appointment-date">Tomorrow, 10:00 AM</div>
+        </li>
+        <li class="appointment-item">
+          <div class="appointment-doctors">Dr. Emily Davis</div>
+          <div class="appointment-specialty">General Checkup</div>
+          <div class="appointment-date">Dec 28, 11:15 AM</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Reminders -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Reminders</h3>
+    </div>
+    <div class="card-content">
+      <ul class="reminder-list">
+        <li class="reminder-item">
+          <div class="reminder-time">Morning (8:00 AM)</div>
+          <div class="reminder-desc">Take Blood Pressure Medication</div>
+        </li>
+        <li class="reminder-item">
+          <div class="reminder-time">Afternoon (2:00 PM)</div>
+          <div class="reminder-desc">Blood Sugar Check</div>
+        </li>
+        <li class="reminder-item">
+          <div class="reminder-time">Evening (8:00 PM)</div>
+          <div class="reminder-desc">Evening Walk - 30 mins</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- What's New Section -->
+<div class="grid-3">
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Health Tips</h3>
+    </div>
+    <div class="card-content">
+      <p>
+        Stay hydrated and maintain a balanced diet for better health outcomes.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">New Messages</h3>
+      <a href="/messages" class="card-action">2 New</a>
+    </div>
+    <div class="card-content">
+      <p>You have new messages from your care team.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Recent Activity</h3>
+    </div>
+    <div class="card-content">
+      <p>Last visit: Dec 15, 2024 - Routine Checkup</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

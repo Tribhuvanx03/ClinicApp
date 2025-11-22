@@ -1,0 +1,39 @@
+{% extends "base.html" %} {% block title %}Bill Pay{% endblock %} {% block
+content %}
+<div class="content-header">
+  <h1 class="page-title">Bill Pay</h1>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Billing Overview</h3>
+  </div>
+  <div class="card-content">
+    <div style="text-align: center; padding: 40px">
+      <i
+        class="fas fa-credit-card"
+        style="font-size: 64px; color: #6c757d; margin-bottom: 20px"
+      ></i>
+      <h3 style="color: #333; margin-bottom: 15px">Bill Pay Portal</h3>
+      <p style="color: #6c757d; margin-bottom: 25px">
+        View your bills, make payments, and manage your billing preferences.
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h4>Current Balance</h4>
+          <p style="font-size: 24px; font-weight: bold; color: #333">$0.00</p>
+        </div>
+        <div class="card">
+          <h4>Due Date</h4>
+          <p style="font-size: 18px; color: #333">No pending bills</p>
+        </div>
+        <div class="card">
+          <h4>Last Payment</h4>
+          <p style="font-size: 18px; color: #333">$150.00</p>
+          <p style="font-size: 14px; color: #6c757d">Nov 15, 2024</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

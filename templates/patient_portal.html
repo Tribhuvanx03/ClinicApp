@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Patient Portal</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      .portal {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="portal">
+      <h1>Welcome to Patient Portal</h1>
+      <p>Logged in as: {{ user }}</p>
+
+      <div class="section">
+        <h3>Medical Records</h3>
+        <p>Your medical history and records will appear here.</p>
+      </div>
+
+      <div class="section">
+        <h3>Appointments</h3>
+        <p>Upcoming and past appointments.</p>
+      </div>
+
+      <div class="section">
+        <h3>Prescriptions</h3>
+        <p>Current and past prescriptions.</p>
+      </div>
+
+      <a href="/">Logout</a>
+    </div>
+  </body>
+</html>
