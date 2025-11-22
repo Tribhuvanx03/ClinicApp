@@ -65,18 +65,11 @@
         margin-bottom: 30px;
       }
 
-      .logo-placeholder {
+      .logo-img {
         width: 80px;
         height: 80px;
-        background: #f8f9fa;
-        border: 2px dashed #dee2e6;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px;
-        color: #6c757d;
-        font-size: 12px;
+        object-fit: contain;
+        margin-bottom: 15px;
       }
 
       h1 {
@@ -152,6 +145,10 @@
         font-size: 14px;
         margin-top: 10px;
         text-align: center;
+        padding: 10px;
+        background: #f8d7da;
+        border-radius: 5px;
+        border: 1px solid #f5c6cb;
       }
 
       .success-message {
@@ -159,6 +156,10 @@
         font-size: 14px;
         margin-top: 10px;
         text-align: center;
+        padding: 10px;
+        background: #d4edda;
+        border-radius: 5px;
+        border: 1px solid #c3e6cb;
       }
 
       .step {
@@ -171,29 +172,83 @@
 
       .otp-info {
         background: #e7f3ff;
-        padding: 10px;
-        border-radius: 5px;
+        padding: 15px;
+        border-radius: 8px;
         margin-bottom: 20px;
         text-align: center;
         font-size: 14px;
         color: #0066cc;
+        border: 1px solid #b3d9ff;
+      }
+
+      .demo-otp {
+        background: #fff3cd;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 15px 0;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      .demo-note {
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+        margin-top: 5px;
+        font-style: italic;
+      }
+
+      .contact-admin {
+        margin-top: 20px;
+        text-align: center;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+      }
+
+      .contact-admin p {
+        color: #666;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .contact-links {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+
+      .contact-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: color 0.3s ease;
+      }
+
+      .contact-link:hover {
+        color: #0056b3;
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
     <div class="login-container">
       <div class="login-header">
-        <button class="login-tab active" data-tab="customer">Customer</button>
-        <button class="login-tab" data-tab="admin">Admin</button>
+        <button class="login-tab active" data-tab="customer">Patient Login</button>
+        <button class="login-tab" data-tab="admin">Admin Login</button>
       </div>
 
       <div class="login-content">
         <!-- Logo -->
         <div class="logo">
-          <div class="logo-placeholder">LOGO</div>
+          <img src="/project/workspace/Logo.png" alt="Hospital Logo" class="logo-img" onerror="this.style.display='none'">
+          <h1>Hospital Patient Portal</h1>
         </div>
-
-        <h1>User Login/Sign Up</h1>
 
         <!-- Customer Login (Mobile + OTP) -->
         <div id="customer-login" class="login-form">
@@ -209,8 +264,24 @@
                 pattern="[0-9]{10}"
               />
             </div>
+            <div class="demo-note">
+              Demo: Use 1234567890 (only registered number)
+            </div>
             <button class="btn" onclick="sendOTP()">Send OTP</button>
-            <div id="mobile-error" class="error-message"></div>
+            <div id="mobile-message"></div>
+            
+            <!-- Contact Admin Section (hidden by default) -->
+            <div id="contact-admin" class="contact-admin" style="display: none;">
+              <p>Need help with registration?</p>
+              <div class="contact-links">
+                <a href="mailto:admin@hospital.com?subject=Patient Portal Registration Issue" class="contact-link">
+                  📧 Contact Admin
+                </a>
+                <a href="tel:+1-555-123-4567" class="contact-link">
+                  📞 Call Support
+                </a>
+              </div>
+            </div>
           </div>
 
           <!-- Step 2: OTP Verification -->
@@ -218,6 +289,12 @@
             <div class="otp-info">
               OTP sent to <span id="mobile-display"></span>
             </div>
+            
+            <!-- Demo OTP Display -->
+            <div id="demo-otp-display" class="demo-otp" style="display: none;">
+              Demo OTP: <span id="otp-value"></span>
+            </div>
+            
             <div class="form-group">
               <label for="otp">Enter OTP</label>
               <input
@@ -232,8 +309,8 @@
               <input type="checkbox" id="remember-me" />
               <label for="remember-me">Remember Me</label>
             </div>
-            <button class="btn" onclick="verifyOTP()">Login</button>
-            <div id="otp-error" class="error-message"></div>
+            <button class="btn" onclick="verifyOTP()">Login to Portal</button>
+            <div id="otp-message"></div>
           </div>
         </div>
 
@@ -247,8 +324,11 @@
             <label for="password">Password</label>
             <input type="password" id="password" placeholder="Enter password" />
           </div>
-          <button class="btn" onclick="adminLogin()">Login</button>
-          <div id="admin-error" class="error-message"></div>
+          <div class="demo-note">
+            Demo: admin@hospital.com / admin123
+          </div>
+          <button class="btn" onclick="adminLogin()">Login to Admin Dashboard</button>
+          <div id="admin-message"></div>
         </div>
       </div>
     </div>
@@ -273,23 +353,30 @@
           // Reset steps for customer login
           if (tabType === "customer") {
             showStep("step-mobile");
+            resetMessages();
+          } else {
+            resetMessages();
           }
         });
       });
 
       let currentMobile = "";
+      let currentOTP = "";
 
       function sendOTP() {
         const mobile = document.getElementById("mobile").value;
-        const errorDiv = document.getElementById("mobile-error");
+        const messageDiv = document.getElementById("mobile-message");
+        const contactAdmin = document.getElementById("contact-admin");
 
         // Validate mobile
         if (!mobile || mobile.length !== 10 || !/^\d+$/.test(mobile)) {
-          errorDiv.textContent = "Please enter a valid 10-digit mobile number";
+          messageDiv.className = "error-message";
+          messageDiv.textContent = "Please enter a valid 10-digit mobile number";
+          contactAdmin.style.display = "none";
           return;
         }
 
-        errorDiv.textContent = "";
+        messageDiv.textContent = "";
         currentMobile = mobile;
 
         // Send OTP request
@@ -305,22 +392,42 @@
             if (data.success) {
               document.getElementById("mobile-display").textContent = mobile;
               showStep("step-otp");
+              
+              // Display OTP for demo purposes
+              currentOTP = data.otp;
+              document.getElementById("otp-value").textContent = currentOTP;
+              document.getElementById("demo-otp-display").style.display = "block";
+              
+              messageDiv.className = "success-message";
+              messageDiv.textContent = data.message;
+              contactAdmin.style.display = "none";
             } else {
-              errorDiv.textContent = data.message;
+              messageDiv.className = "error-message";
+              messageDiv.textContent = data.message;
+              
+              // Show contact admin for registration errors
+              if (data.message.includes('not registered')) {
+                contactAdmin.style.display = "block";
+              } else {
+                contactAdmin.style.display = "none";
+              }
             }
           })
           .catch((error) => {
-            errorDiv.textContent = "Network error. Please try again.";
+            messageDiv.className = "error-message";
+            messageDiv.textContent = "Network error. Please try again.";
+            contactAdmin.style.display = "none";
           });
       }
 
       function verifyOTP() {
         const otp = document.getElementById("otp").value;
         const rememberMe = document.getElementById("remember-me").checked;
-        const errorDiv = document.getElementById("otp-error");
+        const messageDiv = document.getElementById("otp-message");
 
         if (!otp || otp.length < 4) {
-          errorDiv.textContent = "Please enter a valid OTP";
+          messageDiv.className = "error-message";
+          messageDiv.textContent = "Please enter a valid OTP";
           return;
         }
 
@@ -338,20 +445,26 @@
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              window.location.href = "/dashboard";
+              messageDiv.className = "success-message";
+              messageDiv.textContent = "Login successful! Redirecting...";
+              setTimeout(() => {
+                window.location.href = "/dashboard";
+              }, 1000);
             } else {
-              errorDiv.textContent = data.message;
+              messageDiv.className = "error-message";
+              messageDiv.textContent = data.message;
             }
           })
           .catch((error) => {
-            errorDiv.textContent = "Network error. Please try again.";
+            messageDiv.className = "error-message";
+            messageDiv.textContent = "Network error. Please try again.";
           });
       }
 
       function adminLogin() {
         const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-        const errorDiv = document.getElementById("admin-error");
+        const messageDiv = document.getElementById("admin-message");
 
         const formData = new FormData();
         formData.append("email", email);
@@ -364,13 +477,19 @@
           .then((response) => response.json())
           .then((data) => {
             if (data.success) {
-              window.location.href = "/admin-dashboard";
+              messageDiv.className = "success-message";
+              messageDiv.textContent = "Login successful! Redirecting...";
+              setTimeout(() => {
+                window.location.href = "/admin-dashboard";
+              }, 1000);
             } else {
-              errorDiv.textContent = data.message || "Invalid credentials";
+              messageDiv.className = "error-message";
+              messageDiv.textContent = data.message || "Invalid credentials";
             }
           })
           .catch((error) => {
-            errorDiv.textContent = "Network error. Please try again.";
+            messageDiv.className = "error-message";
+            messageDiv.textContent = "Network error. Please try again.";
           });
       }
 
@@ -381,6 +500,14 @@
         document.getElementById(stepId).classList.add("active");
       }
 
+      function resetMessages() {
+        document.querySelectorAll('.error-message, .success-message').forEach(msg => {
+          msg.textContent = '';
+        });
+        document.getElementById('contact-admin').style.display = 'none';
+        document.getElementById('demo-otp-display').style.display = 'none';
+      }
+
       // Mobile number validation
       document.getElementById("mobile").addEventListener("input", function (e) {
         this.value = this.value.replace(/\D/g, "").slice(0, 10);
@@ -389,6 +516,25 @@
       // OTP validation
       document.getElementById("otp").addEventListener("input", function (e) {
         this.value = this.value.replace(/\D/g, "").slice(0, 6);
+      });
+
+      // Auto-fill demo credentials for easier testing
+      document.getElementById("mobile").addEventListener("focus", function() {
+        if (!this.value) {
+          this.value = "1234567890";
+        }
+      });
+
+      document.getElementById("email").addEventListener("focus", function() {
+        if (!this.value) {
+          this.value = "admin@hospital.com";
+        }
+      });
+
+      document.getElementById("password").addEventListener("focus", function() {
+        if (!this.value) {
+          this.value = "admin123";
+        }
       });
     </script>
   </body>
