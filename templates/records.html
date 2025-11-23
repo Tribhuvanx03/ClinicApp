@@ -1,62 +1,881 @@
 {% extends "base.html" %} {% block title %}My Records{% endblock %} {% block
 content %}
 <div class="content-header">
-  <h1 class="page-title">My Records</h1>
+  <h1 class="page-title">My Medical Records</h1>
+  <button class="btn btn-primary" onclick="downloadAllRecords()">
+    <i class="fas fa-download"></i> Download All Records
+  </button>
 </div>
 
 <!-- Record Categories -->
-<div style="max-width: 800px">
-  <div class="record-category">
-    <div class="record-title">Visit Summaries</div>
+<div style="max-width: 1000px">
+  <div class="record-category" data-category="visits">
+    <div class="record-title">
+      <i class="fas fa-stethoscope"></i> Visit Summaries
+    </div>
     <div class="record-desc">
       Detailed reports from your medical visits and consultations
     </div>
+    <div class="record-count">3 visits</div>
   </div>
 
-  <div class="record-category">
-    <div class="record-title">Lab Results</div>
+  <div class="record-category" data-category="labs">
+    <div class="record-title"><i class="fas fa-flask"></i> Lab Results</div>
     <div class="record-desc">
       Blood tests, urine tests, and other laboratory reports
     </div>
+    <div class="record-count">8 reports</div>
   </div>
 
-  <div class="record-category">
-    <div class="record-title">Imaging Reports</div>
+  <div class="record-category" data-category="imaging">
+    <div class="record-title"><i class="fas fa-x-ray"></i> Imaging Reports</div>
     <div class="record-desc">
       X-rays, MRIs, CT scans, and ultrasound reports
     </div>
+    <div class="record-count">2 reports</div>
   </div>
 
-  <div class="record-category">
-    <div class="record-title">Prescriptions</div>
+  <div class="record-category" data-category="prescriptions">
+    <div class="record-title"><i class="fas fa-pills"></i> Prescriptions</div>
     <div class="record-desc">
       Current and historical medication prescriptions
     </div>
+    <div class="record-count">5 medications</div>
   </div>
 
-  <div class="record-category">
-    <div class="record-title">Immunization Records</div>
+  <div class="record-category" data-category="immunizations">
+    <div class="record-title">
+      <i class="fas fa-syringe"></i> Immunization Records
+    </div>
     <div class="record-desc">
       Vaccination history and immunization schedules
     </div>
+    <div class="record-count">12 vaccinations</div>
   </div>
 
-  <div class="record-category">
-    <div class="record-title">Medical History</div>
+  <div class="record-category" data-category="history">
+    <div class="record-title">
+      <i class="fas fa-history"></i> Medical History
+    </div>
     <div class="record-desc">
       Comprehensive medical history and chronic conditions
     </div>
+    <div class="record-count">Complete profile</div>
   </div>
 </div>
 
+<!-- Reports Display Area -->
+<div id="reports-container" class="reports-container" style="display: none">
+  <div class="reports-header">
+    <h2 id="reports-category-title">Category Reports</h2>
+    <button class="btn btn-secondary" onclick="closeReports()">
+      <i class="fas fa-times"></i> Close
+    </button>
+  </div>
+  <div id="reports-content" class="reports-content">
+    <!-- Reports will be loaded here dynamically -->
+  </div>
+</div>
+
+<style>
+  .record-category {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .record-category:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .record-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  .record-title i {
+    margin-right: 10px;
+    color: #007bff;
+  }
+
+  .record-desc {
+    font-size: 14px;
+    color: #6c757d;
+  }
+
+  .record-count {
+    background: #007bff;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .reports-container {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-top: 30px;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .reports-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .reports-content {
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  .report-item {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .report-item:hover {
+    border-color: #007bff;
+    background: #f1f8ff;
+  }
+
+  .report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+
+  .report-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .report-date {
+    color: #6c757d;
+    font-size: 14px;
+  }
+
+  .report-details {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .report-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .lab-result {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .lab-result:last-child {
+    border-bottom: none;
+  }
+
+  .lab-value {
+    font-weight: 600;
+  }
+
+  .lab-normal {
+    color: #28a745;
+  }
+
+  .lab-abnormal {
+    color: #dc3545;
+  }
+
+  .prescription-item {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-active {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .status-completed {
+    background: #e2e3e5;
+    color: #383d41;
+  }
+
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .medical-condition {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+  }
+
+  .condition-severity {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 10px;
+  }
+
+  .severity-mild {
+    background: #d4edda;
+    color: #155724;
+  }
+  .severity-moderate {
+    background: #fff3cd;
+    color: #856404;
+  }
+  .severity-severe {
+    background: #f8d7da;
+    color: #721c24;
+  }
+</style>
+
 <script>
+  // Sample medical records data
+  const medicalRecords = {
+    visits: [
+      {
+        id: 1,
+        title: "Annual Physical Examination",
+        date: "Nov 15, 2024",
+        doctor: "Dr. Michael Chen",
+        department: "Primary Care",
+        summary:
+          "Comprehensive annual check-up. Patient is in good health with stable vital signs. Recommended maintaining current exercise regimen and healthy diet.",
+        diagnosis: "Healthy individual, no acute issues",
+        recommendations: [
+          "Continue current lifestyle",
+          "Follow up in 1 year",
+          "Maintain healthy diet and exercise",
+        ],
+      },
+      {
+        id: 2,
+        title: "Cardiology Consultation",
+        date: "Oct 20, 2024",
+        doctor: "Dr. Sarah Johnson",
+        department: "Cardiology",
+        summary:
+          "Follow-up consultation for cholesterol management. Patient shows significant improvement in lipid profile since last visit.",
+        diagnosis: "Hyperlipidemia, well-controlled",
+        recommendations: [
+          "Continue Atorvastatin 20mg daily",
+          "Repeat lipid panel in 6 months",
+          "Cardiac diet adherence",
+        ],
+      },
+      {
+        id: 3,
+        title: "Upper Respiratory Infection",
+        date: "Sep 5, 2024",
+        doctor: "Dr. Michael Chen",
+        department: "Primary Care",
+        summary:
+          "Patient presented with cough, sore throat, and mild fever. No signs of bacterial infection.",
+        diagnosis: "Viral upper respiratory infection",
+        recommendations: [
+          "Symptomatic treatment",
+          "Adequate hydration",
+          "Rest for 3-5 days",
+        ],
+      },
+    ],
+    labs: [
+      {
+        id: 1,
+        title: "Complete Blood Count (CBC)",
+        date: "Nov 10, 2024",
+        status: "Normal",
+        results: [
+          {
+            test: "White Blood Cells",
+            value: "7.2",
+            unit: "x10³/μL",
+            normal: "4.0-11.0",
+            status: "normal",
+          },
+          {
+            test: "Red Blood Cells",
+            value: "4.8",
+            unit: "x10⁶/μL",
+            normal: "4.2-5.8",
+            status: "normal",
+          },
+          {
+            test: "Hemoglobin",
+            value: "14.2",
+            unit: "g/dL",
+            normal: "13.0-17.0",
+            status: "normal",
+          },
+          {
+            test: "Platelets",
+            value: "250",
+            unit: "x10³/μL",
+            normal: "150-450",
+            status: "normal",
+          },
+        ],
+      },
+      {
+        id: 2,
+        title: "Lipid Panel",
+        date: "Nov 10, 2024",
+        status: "Improved",
+        results: [
+          {
+            test: "Total Cholesterol",
+            value: "185",
+            unit: "mg/dL",
+            normal: "<200",
+            status: "normal",
+          },
+          {
+            test: "LDL Cholesterol",
+            value: "95",
+            unit: "mg/dL",
+            normal: "<100",
+            status: "normal",
+          },
+          {
+            test: "HDL Cholesterol",
+            value: "55",
+            unit: "mg/dL",
+            normal: ">40",
+            status: "normal",
+          },
+          {
+            test: "Triglycerides",
+            value: "120",
+            unit: "mg/dL",
+            normal: "<150",
+            status: "normal",
+          },
+        ],
+      },
+      {
+        id: 3,
+        title: "Comprehensive Metabolic Panel",
+        date: "Nov 10, 2024",
+        status: "Normal",
+        results: [
+          {
+            test: "Glucose",
+            value: "92",
+            unit: "mg/dL",
+            normal: "70-99",
+            status: "normal",
+          },
+          {
+            test: "Creatinine",
+            value: "0.9",
+            unit: "mg/dL",
+            normal: "0.7-1.3",
+            status: "normal",
+          },
+          {
+            test: "ALT",
+            value: "28",
+            unit: "U/L",
+            normal: "7-55",
+            status: "normal",
+          },
+          {
+            test: "AST",
+            value: "25",
+            unit: "U/L",
+            normal: "8-48",
+            status: "normal",
+          },
+        ],
+      },
+    ],
+    imaging: [
+      {
+        id: 1,
+        title: "Chest X-Ray",
+        date: "Aug 15, 2024",
+        type: "X-Ray",
+        bodyPart: "Chest",
+        impression:
+          "Normal cardiomediastinal silhouette. Clear lungs. No evidence of acute cardiopulmonary disease.",
+        findings:
+          "Heart size normal. Lungs clear. No pleural effusion or pneumothorax. Bony structures intact.",
+      },
+      {
+        id: 2,
+        title: "Abdominal Ultrasound",
+        date: "Jun 20, 2024",
+        type: "Ultrasound",
+        bodyPart: "Abdomen",
+        impression:
+          "Normal abdominal ultrasound. No evidence of gallstones, liver masses, or renal abnormalities.",
+        findings:
+          "Liver: Normal size and echotexture. Gallbladder: No stones or wall thickening. Kidneys: Normal size and cortical thickness.",
+      },
+    ],
+    prescriptions: [
+      {
+        id: 1,
+        medication: "Atorvastatin",
+        dosage: "20mg",
+        frequency: "Once daily",
+        prescribed: "Oct 20, 2024",
+        expires: "Oct 20, 2025",
+        prescriber: "Dr. Sarah Johnson",
+        status: "active",
+        purpose: "Cholesterol management",
+      },
+      {
+        id: 2,
+        medication: "Lisinopril",
+        dosage: "10mg",
+        frequency: "Once daily",
+        prescribed: "Nov 15, 2023",
+        expires: "Nov 15, 2024",
+        prescriber: "Dr. Michael Chen",
+        status: "completed",
+        purpose: "Blood pressure control",
+      },
+      {
+        id: 3,
+        medication: "Vitamin D3",
+        dosage: "1000 IU",
+        frequency: "Once daily",
+        prescribed: "Jan 10, 2024",
+        expires: "Jan 10, 2025",
+        prescriber: "Dr. Michael Chen",
+        status: "active",
+        purpose: "Vitamin supplementation",
+      },
+    ],
+    immunizations: [
+      {
+        vaccine: "Influenza",
+        date: "Oct 15, 2024",
+        lot: "FLU2024-123",
+        provider: "Primary Care Clinic",
+      },
+      {
+        vaccine: "COVID-19 Booster",
+        date: "Sep 20, 2024",
+        lot: "COVID-BST-456",
+        provider: "Community Health Center",
+      },
+      {
+        vaccine: "Tetanus/Diphtheria",
+        date: "Mar 10, 2023",
+        lot: "TD-789",
+        provider: "Primary Care Clinic",
+      },
+      {
+        vaccine: "Pneumococcal",
+        date: "Jan 15, 2023",
+        lot: "PNEUMO-321",
+        provider: "Primary Care Clinic",
+      },
+    ],
+    history: {
+      conditions: [
+        {
+          condition: "Hyperlipidemia",
+          diagnosed: "2022",
+          status: "Controlled",
+          severity: "mild",
+        },
+        {
+          condition: "Seasonal Allergies",
+          diagnosed: "2018",
+          status: "Active",
+          severity: "mild",
+        },
+        {
+          condition: "Hypertension",
+          diagnosed: "2020",
+          status: "Resolved",
+          severity: "mild",
+        },
+      ],
+      allergies: [
+        { allergen: "Penicillin", reaction: "Rash", severity: "Moderate" },
+        { allergen: "Shellfish", reaction: "Hives", severity: "Mild" },
+      ],
+      surgeries: [
+        { procedure: "Appendectomy", date: "2010", surgeon: "Dr. Robert Kim" },
+        {
+          procedure: "Knee Arthroscopy",
+          date: "2018",
+          surgeon: "Dr. Amanda White",
+        },
+      ],
+      familyHistory: {
+        father: "Hypertension, Coronary Artery Disease",
+        mother: "Breast Cancer, Osteoporosis",
+        siblings: "None significant",
+      },
+    },
+  };
+
   document.querySelectorAll(".record-category").forEach((category) => {
     category.addEventListener("click", function () {
-      const title = this.querySelector(".record-title").textContent;
-      alert(
-        `Opening ${title} section - This would show detailed records in a real application`
-      );
+      const categoryType = this.getAttribute("data-category");
+      loadCategoryReports(categoryType);
     });
   });
+
+  function loadCategoryReports(category) {
+    const container = document.getElementById("reports-container");
+    const content = document.getElementById("reports-content");
+    const title = document.getElementById("reports-category-title");
+
+    // Update title
+    const categoryTitles = {
+      visits: "Visit Summaries",
+      labs: "Laboratory Results",
+      imaging: "Imaging Reports",
+      prescriptions: "Prescription History",
+      immunizations: "Immunization Records",
+      history: "Medical History",
+    };
+    title.textContent = categoryTitles[category];
+
+    // Load content based on category
+    let html = "";
+
+    switch (category) {
+      case "visits":
+        html = medicalRecords.visits
+          .map(
+            (visit) => `
+            <div class="report-item">
+              <div class="report-header">
+                <div>
+                  <div class="report-title">${visit.title}</div>
+                  <div class="report-date">${visit.date} • ${visit.doctor} • ${
+              visit.department
+            }</div>
+                </div>
+              </div>
+              <div class="report-details">
+                <p><strong>Summary:</strong> ${visit.summary}</p>
+                <p><strong>Diagnosis:</strong> ${visit.diagnosis}</p>
+                <p><strong>Recommendations:</strong></p>
+                <ul>
+                  ${visit.recommendations
+                    .map((rec) => `<li>${rec}</li>`)
+                    .join("")}
+                </ul>
+              </div>
+              <div class="report-actions">
+                <button class="btn btn-sm btn-primary" onclick="downloadReport('visit', ${
+                  visit.id
+                })">
+                  <i class="fas fa-download"></i> Download
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="shareReport('visit', ${
+                  visit.id
+                })">
+                  <i class="fas fa-share"></i> Share
+                </button>
+              </div>
+            </div>
+          `
+          )
+          .join("");
+        break;
+
+      case "labs":
+        html = medicalRecords.labs
+          .map(
+            (lab) => `
+            <div class="report-item">
+              <div class="report-header">
+                <div>
+                  <div class="report-title">${lab.title}</div>
+                  <div class="report-date">${lab.date}</div>
+                </div>
+                <span class="status-badge ${
+                  lab.status === "Normal" ? "status-active" : "status-completed"
+                }">${lab.status}</span>
+              </div>
+              <div class="report-details">
+                ${lab.results
+                  .map(
+                    (result) => `
+                  <div class="lab-result">
+                    <div>${result.test}</div>
+                    <div class="lab-value ${
+                      result.status === "normal" ? "lab-normal" : "lab-abnormal"
+                    }">
+                      ${result.value} ${result.unit} (Normal: ${result.normal})
+                    </div>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+              <div class="report-actions">
+                <button class="btn btn-sm btn-primary" onclick="downloadReport('lab', ${
+                  lab.id
+                })">
+                  <i class="fas fa-download"></i> Download Full Report
+                </button>
+              </div>
+            </div>
+          `
+          )
+          .join("");
+        break;
+
+      case "imaging":
+        html = medicalRecords.imaging
+          .map(
+            (image) => `
+            <div class="report-item">
+              <div class="report-header">
+                <div>
+                  <div class="report-title">${image.title}</div>
+                  <div class="report-date">${image.date} • ${image.type} • ${image.bodyPart}</div>
+                </div>
+              </div>
+              <div class="report-details">
+                <p><strong>Clinical Impression:</strong> ${image.impression}</p>
+                <p><strong>Findings:</strong> ${image.findings}</p>
+              </div>
+              <div class="report-actions">
+                <button class="btn btn-sm btn-primary" onclick="downloadReport('imaging', ${image.id})">
+                  <i class="fas fa-download"></i> Download Report
+                </button>
+                <button class="btn btn-sm btn-outline" onclick="viewImages(${image.id})">
+                  <i class="fas fa-eye"></i> View Images
+                </button>
+              </div>
+            </div>
+          `
+          )
+          .join("");
+        break;
+
+      case "prescriptions":
+        html = medicalRecords.prescriptions
+          .map(
+            (prescription) => `
+            <div class="prescription-item">
+              <div class="report-header">
+                <div>
+                  <div class="report-title">${prescription.medication} ${
+              prescription.dosage
+            }</div>
+                  <div class="report-date">Prescribed: ${
+                    prescription.prescribed
+                  } • Expires: ${prescription.expires}</div>
+                </div>
+                <span class="status-badge ${
+                  prescription.status === "active"
+                    ? "status-active"
+                    : "status-completed"
+                }">
+                  ${prescription.status}
+                </span>
+              </div>
+              <div class="report-details">
+                <p><strong>Frequency:</strong> ${prescription.frequency}</p>
+                <p><strong>Purpose:</strong> ${prescription.purpose}</p>
+                <p><strong>Prescriber:</strong> ${prescription.prescriber}</p>
+              </div>
+              <div class="report-actions">
+                <button class="btn btn-sm btn-primary" onclick="refillPrescription(${
+                  prescription.id
+                })">
+                  <i class="fas fa-sync"></i> Request Refill
+                </button>
+              </div>
+            </div>
+          `
+          )
+          .join("");
+        break;
+
+      case "immunizations":
+        html = `
+            <div class="report-item">
+              <h4>Vaccination History</h4>
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Vaccine</th>
+                      <th>Date Administered</th>
+                      <th>Lot Number</th>
+                      <th>Provider</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${medicalRecords.immunizations
+                      .map(
+                        (immunization) => `
+                      <tr>
+                        <td>${immunization.vaccine}</td>
+                        <td>${immunization.date}</td>
+                        <td>${immunization.lot}</td>
+                        <td>${immunization.provider}</td>
+                      </tr>
+                    `
+                      )
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        break;
+
+      case "history":
+        html = `
+            <div class="grid-2">
+              <div>
+                <h4>Medical Conditions</h4>
+                ${medicalRecords.history.conditions
+                  .map(
+                    (condition) => `
+                  <div class="medical-condition">
+                    <strong>${condition.condition}</strong>
+                    <span class="condition-severity severity-${condition.severity}">${condition.severity}</span>
+                    <div>Diagnosed: ${condition.diagnosed}</div>
+                    <div>Status: ${condition.status}</div>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+              <div>
+                <h4>Allergies</h4>
+                ${medicalRecords.history.allergies
+                  .map(
+                    (allergy) => `
+                  <div class="medical-condition">
+                    <strong>${allergy.allergen}</strong>
+                    <div>Reaction: ${allergy.reaction}</div>
+                    <div>Severity: ${allergy.severity}</div>
+                  </div>
+                `
+                  )
+                  .join("")}
+                
+                <h4 style="margin-top: 20px;">Surgical History</h4>
+                ${medicalRecords.history.surgeries
+                  .map(
+                    (surgery) => `
+                  <div class="medical-condition">
+                    <strong>${surgery.procedure}</strong>
+                    <div>Date: ${surgery.date}</div>
+                    <div>Surgeon: ${surgery.surgeon}</div>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </div>
+            
+            <div class="report-item" style="margin-top: 20px;">
+              <h4>Family Medical History</h4>
+              <p><strong>Father:</strong> ${
+                medicalRecords.history.familyHistory.father
+              }</p>
+              <p><strong>Mother:</strong> ${
+                medicalRecords.history.familyHistory.mother
+              }</p>
+              <p><strong>Siblings:</strong> ${
+                medicalRecords.history.familyHistory.siblings
+              }</p>
+            </div>
+          `;
+        break;
+    }
+
+    content.innerHTML = html;
+    container.style.display = "block";
+
+    // Scroll to reports section
+    container.scrollIntoView({ behavior: "smooth" });
+  }
+
+  function closeReports() {
+    document.getElementById("reports-container").style.display = "none";
+  }
+
+  function downloadReport(type, id) {
+    alert(`Downloading ${type} report #${id}`);
+    // In real application, this would trigger file download
+  }
+
+  function shareReport(type, id) {
+    alert(`Sharing ${type} report #${id} with another provider`);
+  }
+
+  function viewImages(id) {
+    alert(`Opening imaging study #${id} in viewer`);
+  }
+
+  function refillPrescription(id) {
+    alert(`Requesting refill for prescription #${id}`);
+  }
+
+  function downloadAllRecords() {
+    alert(
+      "Preparing complete medical record download... This may take a moment."
+    );
+    // In real application, this would generate and download a comprehensive PDF
+  }
 </script>
 {% endblock %}
