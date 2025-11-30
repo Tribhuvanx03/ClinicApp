@@ -597,39 +597,39 @@ content %}
         html = medicalRecords.visits
           .map(
             (visit) => `
-            <div class="report-item">
-              <div class="report-header">
-                <div>
-                  <div class="report-title">${visit.title}</div>
-                  <div class="report-date">${visit.date} • ${visit.doctor} • ${
-              visit.department
-            }</div>
+              <div class="report-item">
+                <div class="report-header">
+                  <div>
+                    <div class="report-title">${visit.title}</div>
+                    <div class="report-date">${visit.date} • ${
+              visit.doctor
+            } • ${visit.department}</div>
+                  </div>
+                </div>
+                <div class="report-details">
+                  <p><strong>Summary:</strong> ${visit.summary}</p>
+                  <p><strong>Diagnosis:</strong> ${visit.diagnosis}</p>
+                  <p><strong>Recommendations:</strong></p>
+                  <ul>
+                    ${visit.recommendations
+                      .map((rec) => `<li>${rec}</li>`)
+                      .join("")}
+                  </ul>
+                </div>
+                <div class="report-actions">
+                  <button class="btn btn-sm btn-primary" onclick="downloadRecord('visit', ${
+                    visit.id
+                  })">
+                    <i class="fas fa-download"></i> Download
+                  </button>
+                  <button class="btn btn-sm btn-outline" onclick="shareReport('visit', ${
+                    visit.id
+                  })">
+                    <i class="fas fa-share"></i> Share
+                  </button>
                 </div>
               </div>
-              <div class="report-details">
-                <p><strong>Summary:</strong> ${visit.summary}</p>
-                <p><strong>Diagnosis:</strong> ${visit.diagnosis}</p>
-                <p><strong>Recommendations:</strong></p>
-                <ul>
-                  ${visit.recommendations
-                    .map((rec) => `<li>${rec}</li>`)
-                    .join("")}
-                </ul>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary" onclick="downloadReport('visit', ${
-                  visit.id
-                })">
-                  <i class="fas fa-download"></i> Download
-                </button>
-                <button class="btn btn-sm btn-outline" onclick="shareReport('visit', ${
-                  visit.id
-                })">
-                  <i class="fas fa-share"></i> Share
-                </button>
-              </div>
-            </div>
-          `
+            `
           )
           .join("");
         break;
@@ -638,41 +638,47 @@ content %}
         html = medicalRecords.labs
           .map(
             (lab) => `
-            <div class="report-item">
-              <div class="report-header">
-                <div>
-                  <div class="report-title">${lab.title}</div>
-                  <div class="report-date">${lab.date}</div>
-                </div>
-                <span class="status-badge ${
-                  lab.status === "Normal" ? "status-active" : "status-completed"
-                }">${lab.status}</span>
-              </div>
-              <div class="report-details">
-                ${lab.results
-                  .map(
-                    (result) => `
-                  <div class="lab-result">
-                    <div>${result.test}</div>
-                    <div class="lab-value ${
-                      result.status === "normal" ? "lab-normal" : "lab-abnormal"
-                    }">
-                      ${result.value} ${result.unit} (Normal: ${result.normal})
-                    </div>
+              <div class="report-item">
+                <div class="report-header">
+                  <div>
+                    <div class="report-title">${lab.title}</div>
+                    <div class="report-date">${lab.date}</div>
                   </div>
-                `
-                  )
-                  .join("")}
+                  <span class="status-badge ${
+                    lab.status === "Normal"
+                      ? "status-active"
+                      : "status-completed"
+                  }">${lab.status}</span>
+                </div>
+                <div class="report-details">
+                  ${lab.results
+                    .map(
+                      (result) => `
+                    <div class="lab-result">
+                      <div>${result.test}</div>
+                      <div class="lab-value ${
+                        result.status === "normal"
+                          ? "lab-normal"
+                          : "lab-abnormal"
+                      }">
+                        ${result.value} ${result.unit} (Normal: ${
+                        result.normal
+                      })
+                      </div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+                <div class="report-actions">
+                  <button class="btn btn-sm btn-primary" onclick="downloadRecord('lab', ${
+                    lab.id
+                  })">
+                    <i class="fas fa-download"></i> Download Full Report
+                  </button>
+                </div>
               </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary" onclick="downloadReport('lab', ${
-                  lab.id
-                })">
-                  <i class="fas fa-download"></i> Download Full Report
-                </button>
-              </div>
-            </div>
-          `
+            `
           )
           .join("");
         break;
@@ -681,27 +687,27 @@ content %}
         html = medicalRecords.imaging
           .map(
             (image) => `
-            <div class="report-item">
-              <div class="report-header">
-                <div>
-                  <div class="report-title">${image.title}</div>
-                  <div class="report-date">${image.date} • ${image.type} • ${image.bodyPart}</div>
+              <div class="report-item">
+                <div class="report-header">
+                  <div>
+                    <div class="report-title">${image.title}</div>
+                    <div class="report-date">${image.date} • ${image.type} • ${image.bodyPart}</div>
+                  </div>
+                </div>
+                <div class="report-details">
+                  <p><strong>Clinical Impression:</strong> ${image.impression}</p>
+                  <p><strong>Findings:</strong> ${image.findings}</p>
+                </div>
+                <div class="report-actions">
+                  <button class="btn btn-sm btn-primary" onclick="downloadRecord('imaging', ${image.id})">
+                    <i class="fas fa-download"></i> Download Report
+                  </button>
+                  <button class="btn btn-sm btn-outline" onclick="viewImages(${image.id})">
+                    <i class="fas fa-eye"></i> View Images
+                  </button>
                 </div>
               </div>
-              <div class="report-details">
-                <p><strong>Clinical Impression:</strong> ${image.impression}</p>
-                <p><strong>Findings:</strong> ${image.findings}</p>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary" onclick="downloadReport('imaging', ${image.id})">
-                  <i class="fas fa-download"></i> Download Report
-                </button>
-                <button class="btn btn-sm btn-outline" onclick="viewImages(${image.id})">
-                  <i class="fas fa-eye"></i> View Images
-                </button>
-              </div>
-            </div>
-          `
+            `
           )
           .join("");
         break;
@@ -710,136 +716,136 @@ content %}
         html = medicalRecords.prescriptions
           .map(
             (prescription) => `
-            <div class="prescription-item">
-              <div class="report-header">
-                <div>
-                  <div class="report-title">${prescription.medication} ${
+              <div class="prescription-item">
+                <div class="report-header">
+                  <div>
+                    <div class="report-title">${prescription.medication} ${
               prescription.dosage
             }</div>
-                  <div class="report-date">Prescribed: ${
-                    prescription.prescribed
-                  } • Expires: ${prescription.expires}</div>
+                    <div class="report-date">Prescribed: ${
+                      prescription.prescribed
+                    } • Expires: ${prescription.expires}</div>
+                  </div>
+                  <span class="status-badge ${
+                    prescription.status === "active"
+                      ? "status-active"
+                      : "status-completed"
+                  }">
+                    ${prescription.status}
+                  </span>
                 </div>
-                <span class="status-badge ${
-                  prescription.status === "active"
-                    ? "status-active"
-                    : "status-completed"
-                }">
-                  ${prescription.status}
-                </span>
+                <div class="report-details">
+                  <p><strong>Frequency:</strong> ${prescription.frequency}</p>
+                  <p><strong>Purpose:</strong> ${prescription.purpose}</p>
+                  <p><strong>Prescriber:</strong> ${prescription.prescriber}</p>
+                </div>
+                <div class="report-actions">
+                  <button class="btn btn-sm btn-primary" onclick="refillPrescription(${
+                    prescription.id
+                  })">
+                    <i class="fas fa-sync"></i> Request Refill
+                  </button>
+                </div>
               </div>
-              <div class="report-details">
-                <p><strong>Frequency:</strong> ${prescription.frequency}</p>
-                <p><strong>Purpose:</strong> ${prescription.purpose}</p>
-                <p><strong>Prescriber:</strong> ${prescription.prescriber}</p>
-              </div>
-              <div class="report-actions">
-                <button class="btn btn-sm btn-primary" onclick="refillPrescription(${
-                  prescription.id
-                })">
-                  <i class="fas fa-sync"></i> Request Refill
-                </button>
-              </div>
-            </div>
-          `
+            `
           )
           .join("");
         break;
 
       case "immunizations":
         html = `
-            <div class="report-item">
-              <h4>Vaccination History</h4>
-              <div class="table-responsive">
-                <table class="data-table">
-                  <thead>
-                    <tr>
-                      <th>Vaccine</th>
-                      <th>Date Administered</th>
-                      <th>Lot Number</th>
-                      <th>Provider</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${medicalRecords.immunizations
-                      .map(
-                        (immunization) => `
+              <div class="report-item">
+                <h4>Vaccination History</h4>
+                <div class="table-responsive">
+                  <table class="data-table">
+                    <thead>
                       <tr>
-                        <td>${immunization.vaccine}</td>
-                        <td>${immunization.date}</td>
-                        <td>${immunization.lot}</td>
-                        <td>${immunization.provider}</td>
+                        <th>Vaccine</th>
+                        <th>Date Administered</th>
+                        <th>Lot Number</th>
+                        <th>Provider</th>
                       </tr>
-                    `
-                      )
-                      .join("")}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      ${medicalRecords.immunizations
+                        .map(
+                          (immunization) => `
+                        <tr>
+                          <td>${immunization.vaccine}</td>
+                          <td>${immunization.date}</td>
+                          <td>${immunization.lot}</td>
+                          <td>${immunization.provider}</td>
+                        </tr>
+                      `
+                        )
+                        .join("")}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
-          `;
+            `;
         break;
 
       case "history":
         html = `
-            <div class="grid-2">
-              <div>
-                <h4>Medical Conditions</h4>
-                ${medicalRecords.history.conditions
-                  .map(
-                    (condition) => `
-                  <div class="medical-condition">
-                    <strong>${condition.condition}</strong>
-                    <span class="condition-severity severity-${condition.severity}">${condition.severity}</span>
-                    <div>Diagnosed: ${condition.diagnosed}</div>
-                    <div>Status: ${condition.status}</div>
-                  </div>
-                `
-                  )
-                  .join("")}
+              <div class="grid-2">
+                <div>
+                  <h4>Medical Conditions</h4>
+                  ${medicalRecords.history.conditions
+                    .map(
+                      (condition) => `
+                    <div class="medical-condition">
+                      <strong>${condition.condition}</strong>
+                      <span class="condition-severity severity-${condition.severity}">${condition.severity}</span>
+                      <div>Diagnosed: ${condition.diagnosed}</div>
+                      <div>Status: ${condition.status}</div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+                <div>
+                  <h4>Allergies</h4>
+                  ${medicalRecords.history.allergies
+                    .map(
+                      (allergy) => `
+                    <div class="medical-condition">
+                      <strong>${allergy.allergen}</strong>
+                      <div>Reaction: ${allergy.reaction}</div>
+                      <div>Severity: ${allergy.severity}</div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                  
+                  <h4 style="margin-top: 20px;">Surgical History</h4>
+                  ${medicalRecords.history.surgeries
+                    .map(
+                      (surgery) => `
+                    <div class="medical-condition">
+                      <strong>${surgery.procedure}</strong>
+                      <div>Date: ${surgery.date}</div>
+                      <div>Surgeon: ${surgery.surgeon}</div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
               </div>
-              <div>
-                <h4>Allergies</h4>
-                ${medicalRecords.history.allergies
-                  .map(
-                    (allergy) => `
-                  <div class="medical-condition">
-                    <strong>${allergy.allergen}</strong>
-                    <div>Reaction: ${allergy.reaction}</div>
-                    <div>Severity: ${allergy.severity}</div>
-                  </div>
-                `
-                  )
-                  .join("")}
-                
-                <h4 style="margin-top: 20px;">Surgical History</h4>
-                ${medicalRecords.history.surgeries
-                  .map(
-                    (surgery) => `
-                  <div class="medical-condition">
-                    <strong>${surgery.procedure}</strong>
-                    <div>Date: ${surgery.date}</div>
-                    <div>Surgeon: ${surgery.surgeon}</div>
-                  </div>
-                `
-                  )
-                  .join("")}
+              
+              <div class="report-item" style="margin-top: 20px;">
+                <h4>Family Medical History</h4>
+                <p><strong>Father:</strong> ${
+                  medicalRecords.history.familyHistory.father
+                }</p>
+                <p><strong>Mother:</strong> ${
+                  medicalRecords.history.familyHistory.mother
+                }</p>
+                <p><strong>Siblings:</strong> ${
+                  medicalRecords.history.familyHistory.siblings
+                }</p>
               </div>
-            </div>
-            
-            <div class="report-item" style="margin-top: 20px;">
-              <h4>Family Medical History</h4>
-              <p><strong>Father:</strong> ${
-                medicalRecords.history.familyHistory.father
-              }</p>
-              <p><strong>Mother:</strong> ${
-                medicalRecords.history.familyHistory.mother
-              }</p>
-              <p><strong>Siblings:</strong> ${
-                medicalRecords.history.familyHistory.siblings
-              }</p>
-            </div>
-          `;
+            `;
         break;
     }
 
@@ -854,9 +860,9 @@ content %}
     document.getElementById("reports-container").style.display = "none";
   }
 
-  function downloadReport(type, id) {
-    alert(`Downloading ${type} report #${id}`);
-    // In real application, this would trigger file download
+  function downloadRecord(type, id) {
+    // Use the backend route for actual file download
+    window.open(`/download-record/${type}/${id}`, "_blank");
   }
 
   function shareReport(type, id) {
@@ -872,10 +878,8 @@ content %}
   }
 
   function downloadAllRecords() {
-    alert(
-      "Preparing complete medical record download... This may take a moment."
-    );
-    // In real application, this would generate and download a comprehensive PDF
+    // Use the backend route for actual file download
+    window.open("/download-all-records", "_blank");
   }
 </script>
 {% endblock %}
