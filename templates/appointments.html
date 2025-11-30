@@ -4,6 +4,52 @@ content %}
   <h1 class="page-title">Appointments</h1>
 </div>
 
+<!-- Modals -->
+<div id="rescheduleModal" class="modal" style="display: none">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Reschedule Appointment</h3>
+      <span class="close" onclick="closeModal('rescheduleModal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <p id="rescheduleDoctorInfo"></p>
+      <div class="form-group">
+        <label for="newAppointmentDate">New Date & Time:</label>
+        <input
+          type="datetime-local"
+          id="newAppointmentDate"
+          class="form-control"
+        />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('rescheduleModal')">
+        Cancel
+      </button>
+      <button class="btn btn-primary" onclick="confirmReschedule()">
+        Confirm Reschedule
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="summaryModal" class="modal" style="display: none">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Appointment Summary</h3>
+      <span class="close" onclick="closeModal('summaryModal')">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div id="summaryContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('summaryModal')">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="grid-2">
   <!-- Upcoming Appointments -->
   <div class="card">
@@ -11,34 +57,8 @@ content %}
       <h3 class="card-title">Upcoming Appointments</h3>
     </div>
     <div class="card-content">
-      <ul class="appointment-list">
-        <li class="appointment-item">
-          <div class="appointment-doctors">Dr. Sarah Johnson</div>
-          <div class="appointment-specialty">Cardiology</div>
-          <div class="appointment-date">Today, 2:30 PM</div>
-          <div class="appointment-actions">
-            <button class="btn btn-outline">Reschedule</button>
-            <button class="btn btn-primary">Cancel</button>
-          </div>
-        </li>
-        <li class="appointment-item">
-          <div class="appointment-doctors">Dr. Michael Chen</div>
-          <div class="appointment-specialty">Dermatology</div>
-          <div class="appointment-date">Tomorrow, 10:00 AM</div>
-          <div class="appointment-actions">
-            <button class="btn btn-outline">Reschedule</button>
-            <button class="btn btn-primary">Cancel</button>
-          </div>
-        </li>
-        <li class="appointment-item">
-          <div class="appointment-doctors">Dr. Emily Davis</div>
-          <div class="appointment-specialty">General Checkup</div>
-          <div class="appointment-date">Dec 28, 11:15 AM</div>
-          <div class="appointment-actions">
-            <button class="btn btn-outline">Reschedule</button>
-            <button class="btn btn-primary">Cancel</button>
-          </div>
-        </li>
+      <ul class="appointment-list" id="upcoming-appointments">
+        <!-- Upcoming appointments will be loaded here dynamically -->
       </ul>
     </div>
   </div>
@@ -49,33 +69,342 @@ content %}
       <h3 class="card-title">Past Appointments</h3>
     </div>
     <div class="card-content">
-      <ul class="appointment-list">
-        <li class="appointment-item">
-          <div class="appointment-doctors">Dr. Robert Wilson</div>
-          <div class="appointment-specialty">Orthopedics</div>
-          <div class="appointment-date">Dec 10, 2024 - 3:00 PM</div>
-          <div class="appointment-actions">
-            <button class="btn btn-primary">View Summary</button>
-          </div>
-        </li>
-        <li class="appointment-item">
-          <div class="appointment-doctors">Dr. Lisa Garcia</div>
-          <div class="appointment-specialty">Pediatrics</div>
-          <div class="appointment-date">Nov 25, 2024 - 9:30 AM</div>
-          <div class="appointment-actions">
-            <button class="btn btn-primary">View Summary</button>
-          </div>
-        </li>
-        <li class="appointment-item">
-          <div class="appointment-doctors">Dr. James Brown</div>
-          <div class="appointment-specialty">Dentistry</div>
-          <div class="appointment-date">Nov 15, 2024 - 1:15 PM</div>
-          <div class="appointment-actions">
-            <button class="btn btn-primary">View Summary</button>
-          </div>
-        </li>
+      <ul class="appointment-list" id="past-appointments">
+        <!-- Past appointments will be loaded here dynamically -->
       </ul>
     </div>
   </div>
 </div>
+
+<style>
+  .modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 10px;
+    width: 500px;
+    max-width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    color: #333;
+  }
+
+  .close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .close:hover {
+    color: #333;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  .appointment-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .appointment-item {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: white;
+  }
+
+  .appointment-doctors {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .appointment-specialty {
+    color: #666;
+    font-size: 14px;
+  }
+
+  .appointment-date {
+    color: #007bff;
+    font-weight: 500;
+  }
+</style>
+
+<script>
+  let currentAppointmentId = null;
+
+  // Sample appointments data - in a real app, this would come from the backend
+  let appointmentsData = {
+    upcoming: [
+      {
+        id: 1,
+        doctor: "Dr. Sarah Johnson",
+        specialty: "Cardiology",
+        date: "Today, 2:30 PM",
+        datetime: new Date().setHours(14, 30, 0, 0),
+      },
+      {
+        id: 2,
+        doctor: "Dr. Michael Chen",
+        specialty: "Dermatology",
+        date: "Tomorrow, 10:00 AM",
+        datetime: new Date(Date.now() + 86400000).setHours(10, 0, 0, 0),
+      },
+      {
+        id: 3,
+        doctor: "Dr. Emily Davis",
+        specialty: "General Checkup",
+        date: "Dec 28, 11:15 AM",
+        datetime: new Date(new Date().getFullYear(), 11, 28, 11, 15).getTime(),
+      },
+    ],
+    past: [
+      {
+        id: 4,
+        doctor: "Dr. Robert Wilson",
+        specialty: "Orthopedics",
+        date: "Dec 10, 2024 - 3:00 PM",
+        summary:
+          "Follow-up for knee pain. Recommended physical therapy and prescribed anti-inflammatory medication.",
+      },
+      {
+        id: 5,
+        doctor: "Dr. Lisa Garcia",
+        specialty: "Pediatrics",
+        date: "Nov 25, 2024 - 9:30 AM",
+        summary: "Annual checkup. Patient is healthy and developing normally.",
+      },
+      {
+        id: 6,
+        doctor: "Dr. James Brown",
+        specialty: "Dentistry",
+        date: "Nov 15, 2024 - 1:15 PM",
+        summary: "Routine dental cleaning. No cavities detected.",
+      },
+    ],
+  };
+
+  // Load appointments when page loads
+  document.addEventListener("DOMContentLoaded", function () {
+    loadAppointments();
+  });
+
+  function loadAppointments() {
+    const upcomingContainer = document.getElementById("upcoming-appointments");
+    const pastContainer = document.getElementById("past-appointments");
+
+    // Load upcoming appointments
+    upcomingContainer.innerHTML = appointmentsData.upcoming
+      .map(
+        (appointment) => `
+        <li class="appointment-item">
+          <div class="appointment-doctors">${appointment.doctor}</div>
+          <div class="appointment-specialty">${appointment.specialty}</div>
+          <div class="appointment-date">${appointment.date}</div>
+          <div class="appointment-actions">
+            <button class="btn btn-outline" onclick="openRescheduleModal(${appointment.id}, '${appointment.doctor} - ${appointment.specialty}')">Reschedule</button>
+            <button class="btn btn-primary" onclick="cancelAppointment(${appointment.id})">Cancel</button>
+          </div>
+        </li>
+      `
+      )
+      .join("");
+
+    // Load past appointments
+    pastContainer.innerHTML = appointmentsData.past
+      .map(
+        (appointment) => `
+        <li class="appointment-item">
+          <div class="appointment-doctors">${appointment.doctor}</div>
+          <div class="appointment-specialty">${appointment.specialty}</div>
+          <div class="appointment-date">${appointment.date}</div>
+          <div class="appointment-actions">
+            <button class="btn btn-primary" onclick="viewAppointmentSummary(${appointment.id})">View Summary</button>
+          </div>
+        </li>
+      `
+      )
+      .join("");
+  }
+
+  function openRescheduleModal(appointmentId, doctorInfo) {
+    currentAppointmentId = appointmentId;
+    document.getElementById(
+      "rescheduleDoctorInfo"
+    ).textContent = `Reschedule appointment with ${doctorInfo}`;
+
+    // Set minimum date to tomorrow
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById("newAppointmentDate").min = tomorrow
+      .toISOString()
+      .slice(0, 16);
+
+    document.getElementById("rescheduleModal").style.display = "block";
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+    currentAppointmentId = null;
+  }
+
+  function confirmReschedule() {
+    const newDate = document.getElementById("newAppointmentDate").value;
+
+    if (!newDate) {
+      alert("Please select a new date and time");
+      return;
+    }
+
+    // Format the new date for display
+    const newDateTime = new Date(newDate);
+    const formattedDate = formatAppointmentDate(newDateTime);
+
+    // Update the appointment in our local data
+    const appointmentIndex = appointmentsData.upcoming.findIndex(
+      (apt) => apt.id === currentAppointmentId
+    );
+    if (appointmentIndex !== -1) {
+      appointmentsData.upcoming[appointmentIndex].date = formattedDate;
+      appointmentsData.upcoming[appointmentIndex].datetime =
+        newDateTime.getTime();
+
+      // Update the display
+      loadAppointments();
+
+      alert(`Appointment rescheduled to ${formattedDate}`);
+      closeModal("rescheduleModal");
+    } else {
+      alert("Error: Appointment not found");
+    }
+  }
+
+  function formatAppointmentDate(date) {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (date.toDateString() === now.toDateString()) {
+      return `Today, ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    } else if (date.toDateString() === tomorrow.toDateString()) {
+      return `Tomorrow, ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    } else {
+      return `${date.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+      })}, ${date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`;
+    }
+  }
+
+  function cancelAppointment(appointmentId) {
+    if (confirm("Are you sure you want to cancel this appointment?")) {
+      const appointmentIndex = appointmentsData.upcoming.findIndex(
+        (apt) => apt.id === appointmentId
+      );
+      if (appointmentIndex !== -1) {
+        const cancelledAppointment = appointmentsData.upcoming.splice(
+          appointmentIndex,
+          1
+        )[0];
+
+        // Add to past appointments with cancellation note
+        appointmentsData.past.unshift({
+          ...cancelledAppointment,
+          date: `Cancelled - ${cancelledAppointment.date}`,
+          summary: "Appointment was cancelled by patient.",
+        });
+
+        // Update the display
+        loadAppointments();
+
+        alert("Appointment cancelled successfully");
+      } else {
+        alert("Error: Appointment not found");
+      }
+    }
+  }
+
+  function viewAppointmentSummary(appointmentId) {
+    const appointment = appointmentsData.past.find(
+      (apt) => apt.id === appointmentId
+    );
+    if (appointment) {
+      const summaryContent = document.getElementById("summaryContent");
+      summaryContent.innerHTML = `
+          <div style="margin-bottom: 15px;">
+            <strong>Doctor:</strong> ${appointment.doctor}<br>
+            <strong>Specialty:</strong> ${appointment.specialty}<br>
+            <strong>Date:</strong> ${appointment.date}
+          </div>
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
+            <strong>Summary:</strong><br>
+            ${appointment.summary}
+          </div>
+        `;
+      document.getElementById("summaryModal").style.display = "block";
+    } else {
+      alert("Appointment summary not found");
+    }
+  }
+
+  // Close modal when clicking outside
+  window.onclick = function (event) {
+    const modals = document.getElementsByClassName("modal");
+    for (let modal of modals) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
+  };
+</script>
 {% endblock %}
