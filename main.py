@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import dash
 from dash import html, dcc, Input, Output, State, callback_context
 import pandas as pd
@@ -9,6 +9,8 @@ import warnings
 import random
 import time
 import os
+import io
+from datetime import datetime, timedelta
 
 warnings.filterwarnings('ignore')
 
@@ -25,6 +27,28 @@ users = {
 # Store OTPs temporarily
 otp_storage = {}
 
+# Sample data for appointments, records, and billing
+appointments_data = {
+    'upcoming': [
+        {'id': 1, 'doctor': 'Dr. Sarah Johnson', 'specialty': 'Cardiology', 'date': 'Today, 2:30 PM', 'datetime': datetime.now().replace(hour=14, minute=30)},
+        {'id': 2, 'doctor': 'Dr. Michael Chen', 'specialty': 'Dermatology', 'date': 'Tomorrow, 10:00 AM', 'datetime': datetime.now() + timedelta(days=1)},
+        {'id': 3, 'doctor': 'Dr. Emily Davis', 'specialty': 'General Checkup', 'date': 'Dec 28, 11:15 AM', 'datetime': datetime.now().replace(month=12, day=28, hour=11, minute=15)}
+    ],
+    'past': [
+        {'id': 4, 'doctor': 'Dr. Robert Wilson', 'specialty': 'Orthopedics', 'date': 'Dec 10, 2024 - 3:00 PM', 'summary': 'Follow-up for knee pain. Recommended physical therapy and prescribed anti-inflammatory medication.'},
+        {'id': 5, 'doctor': 'Dr. Lisa Garcia', 'specialty': 'Pediatrics', 'date': 'Nov 25, 2024 - 9:30 AM', 'summary': 'Annual checkup. Patient is healthy and developing normally.'},
+        {'id': 6, 'doctor': 'Dr. James Brown', 'specialty': 'Dentistry', 'date': 'Nov 15, 2024 - 1:15 PM', 'summary': 'Routine dental cleaning. No cavities detected.'}
+    ]
+}
+
+payment_history = [
+    {'id': 'nov-2024', 'date': 'Nov 15, 2024', 'description': 'Cardiology Consultation', 'amount': 150.00, 'status': 'Paid'},
+    {'id': 'oct-2024', 'date': 'Oct 10, 2024', 'description': 'Laboratory Tests', 'amount': 85.50, 'status': 'Paid'},
+    {'id': 'sep-2024', 'date': 'Sep 5, 2024', 'description': 'Primary Care Visit', 'amount': 75.00, 'status': 'Paid'},
+    {'id': 'aug-2024', 'date': 'Aug 20, 2024', 'description': 'Prescription Medication', 'amount': 45.25, 'status': 'Paid'},
+    {'id': 'jul-2024', 'date': 'Jul 12, 2024', 'description': 'Annual Physical', 'amount': 120.00, 'status': 'Paid'}
+]
+
 # =====================
 # YOUR DASH APP INTEGRATION
 # =====================
@@ -32,7 +56,7 @@ otp_storage = {}
 # Load data - for CodeSandbox, we'll create sample data if file doesn't exist
 try:
     # Try to load your actual data file
-    merged_data = pd.read_excel(r'merged_data.xlsx')
+    merged_data = pd.read_excel(r'/project/workspace/merged_data.xlsx')
     print('Data Loaded')
 except:
     # Create sample data for demo purposes
@@ -565,8 +589,255 @@ def render_charts(clinic_val, age_val, gender_val, main_idx):
         f"{mobile_users:.1f}%",
         f"{feature_utilization_rate:.1f}%"  # NEW KPI VALUE
     ]
+
 # =====================
-# FLASK ROUTES (Existing)
+# NEW FLASK ROUTES FOR FUNCTIONALITY
+# =====================
+
+@server.route('/reschedule-appointment', methods=['POST'])
+def reschedule_appointment():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    data = request.json
+    appointment_id = data.get('appointment_id')
+    new_date = data.get('new_date')
+    
+    try:
+        # Parse the ISO format datetime from frontend
+        new_datetime = datetime.fromisoformat(new_date.replace('Z', '+00:00'))
+        
+        # Format it for display
+        formatted_date = new_datetime.strftime('%b %d, %Y - %I:%M %p')
+        
+        # Find and update appointment
+        for appointment in appointments_data['upcoming']:
+            if appointment['id'] == appointment_id:
+                appointment['date'] = formatted_date
+                appointment['datetime'] = new_datetime
+                return jsonify({
+                    'success': True, 
+                    'message': f'Appointment rescheduled to {formatted_date}'
+                })
+        
+        return jsonify({'success': False, 'message': 'Appointment not found'})
+        
+    except ValueError as e:
+        print(f"Date parsing error: {e}")
+        return jsonify({
+            'success': False, 
+            'message': 'Invalid date format. Please try again.'
+        })
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return jsonify({
+            'success': False, 
+            'message': 'An error occurred while rescheduling.'
+        })
+
+@server.route('/cancel-appointment', methods=['POST'])
+def cancel_appointment():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    data = request.json
+    appointment_id = data.get('appointment_id')
+    
+    # Find and remove appointment
+    for i, appointment in enumerate(appointments_data['upcoming']):
+        if appointment['id'] == appointment_id:
+            cancelled_appointment = appointments_data['upcoming'].pop(i)
+            appointments_data['past'].append({
+                **cancelled_appointment,
+                'summary': 'Appointment was cancelled by patient.',
+                'date': f"Cancelled - {cancelled_appointment['date']}"
+            })
+            return jsonify({'success': True, 'message': 'Appointment cancelled successfully'})
+    
+    return jsonify({'success': False, 'message': 'Appointment not found'})
+
+@server.route('/get-appointment-summary', methods=['POST'])
+def get_appointment_summary():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    data = request.json
+    appointment_id = data.get('appointment_id')
+    
+    # Find appointment summary
+    for appointment in appointments_data['past']:
+        if appointment['id'] == appointment_id:
+            return jsonify({
+                'success': True, 
+                'summary': appointment.get('summary', 'No summary available'),
+                'doctor': appointment['doctor'],
+                'specialty': appointment['specialty'],
+                'date': appointment['date']
+            })
+    
+    return jsonify({'success': False, 'message': 'Appointment summary not found'})
+
+@server.route('/download-record/<record_type>/<int:record_id>')
+def download_record(record_type, record_id):
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    # Create a simple text file for demo purposes
+    content = f"Medical Record - {record_type.upper()}\n"
+    content += f"Patient: {session.get('name', 'Unknown')}\n"
+    content += f"Download Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+    content += "="*50 + "\n"
+    
+    # Add record-specific content
+    if record_type == 'visit':
+        content += "VISIT SUMMARY\n"
+        content += "This would contain detailed visit information in a real system.\n"
+    elif record_type == 'lab':
+        content += "LABORATORY REPORT\n"
+        content += "This would contain lab results in a real system.\n"
+    elif record_type == 'imaging':
+        content += "IMAGING REPORT\n"
+        content += "This would contain imaging findings in a real system.\n"
+    
+    content += "\nThis is a demo file. In a real system, this would be a properly formatted medical document."
+    
+    # Create file in memory
+    file_like = io.BytesIO(content.encode('utf-8'))
+    
+    return send_file(
+        file_like,
+        as_attachment=True,
+        download_name=f"{record_type}_record_{record_id}.txt",
+        mimetype='text/plain'
+    )
+
+@server.route('/download-all-records')
+def download_all_records():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    # Create comprehensive record file
+    content = f"COMPLETE MEDICAL RECORDS\n"
+    content += f"Patient: {session.get('name', 'Unknown')}\n"
+    content += f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+    content += "="*50 + "\n\n"
+    
+    content += "This file contains a summary of all medical records.\n"
+    content += "In a real system, this would include:\n"
+    content += "- Complete visit histories\n"
+    content += "- Laboratory results\n"
+    content += "- Imaging reports\n"
+    content += "- Prescription history\n"
+    content += "- Immunization records\n"
+    content += "- Medical history\n\n"
+    content += "For security and privacy, actual medical records would be properly formatted and encrypted."
+    
+    file_like = io.BytesIO(content.encode('utf-8'))
+    
+    return send_file(
+        file_like,
+        as_attachment=True,
+        download_name=f"complete_medical_records_{datetime.now().strftime('%Y%m%d')}.txt",
+        mimetype='text/plain'
+    )
+
+@server.route('/download-receipt/<receipt_id>')
+def download_receipt(receipt_id):
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    # Find the payment
+    payment = next((p for p in payment_history if p['id'] == receipt_id), None)
+    if not payment:
+        return jsonify({'success': False, 'message': 'Receipt not found'})
+    
+    # Create receipt content
+    content = f"MEDICAL PAYMENT RECEIPT\n"
+    content += "="*50 + "\n"
+    content += f"Patient: {session.get('name', 'Unknown')}\n"
+    content += f"Receipt ID: {receipt_id}\n"
+    content += f"Date: {payment['date']}\n"
+    content += f"Description: {payment['description']}\n"
+    content += f"Amount: ${payment['amount']:.2f}\n"
+    content += f"Status: {payment['status']}\n"
+    content += "="*50 + "\n"
+    content += "Thank you for your payment!\n"
+    content += "Hospital Billing Department\n"
+    content += f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+    
+    file_like = io.BytesIO(content.encode('utf-8'))
+    
+    return send_file(
+        file_like,
+        as_attachment=True,
+        download_name=f"receipt_{receipt_id}.txt",
+        mimetype='text/plain'
+    )
+
+@server.route('/view-statements')
+def view_statements():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    # Create statements content
+    content = f"BILLING STATEMENTS\n"
+    content += "="*50 + "\n"
+    content += f"Patient: {session.get('name', 'Unknown')}\n"
+    content += f"Period: January 2024 - December 2024\n"
+    content += "="*50 + "\n\n"
+    
+    total_amount = sum(p['amount'] for p in payment_history)
+    
+    for payment in payment_history:
+        content += f"Date: {payment['date']}\n"
+        content += f"Service: {payment['description']}\n"
+        content += f"Amount: ${payment['amount']:.2f}\n"
+        content += f"Status: {payment['status']}\n"
+        content += "-" * 30 + "\n"
+    
+    content += f"\nTotal Amount: ${total_amount:.2f}\n"
+    content += "All payments are complete and up to date.\n"
+    
+    file_like = io.BytesIO(content.encode('utf-8'))
+    
+    return send_file(
+        file_like,
+        as_attachment=True,
+        download_name=f"billing_statements_{datetime.now().strftime('%Y%m')}.txt",
+        mimetype='text/plain'
+    )
+
+@server.route('/payment-methods')
+def payment_methods():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    # Return available payment methods
+    return jsonify({
+        'success': True,
+        'payment_methods': [
+            {'type': 'credit_card', 'name': 'Credit Card', 'last4': '4242', 'expiry': '12/25'},
+            {'type': 'bank_account', 'name': 'Bank Account', 'last4': '8637'},
+            {'type': 'paypal', 'name': 'PayPal', 'email': 'patient@example.com'}
+        ]
+    })
+
+@server.route('/billing-alerts', methods=['POST'])
+def billing_alerts():
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Not authenticated'})
+    
+    data = request.json
+    alert_type = data.get('alert_type')
+    enabled = data.get('enabled')
+    
+    return jsonify({
+        'success': True,
+        'message': f'{alert_type} alerts {"enabled" if enabled else "disabled"} successfully'
+    })
+
+# =====================
+# EXISTING FLASK ROUTES
 # =====================
 
 @server.route('/')
